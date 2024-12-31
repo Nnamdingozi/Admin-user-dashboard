@@ -13,10 +13,12 @@ function generateNewUserId(): number {
 }
 
 export const userHandlers = [
- // Mocking GET /users
-  http.get<never, UserProfile[]>(`${API_URL}/users`, async ({ cookies }: { cookies: Record<string, string> }) => {
-    const token = cookies.token;  // Extract token from cookies
 
+  
+ // Mocking GET /users
+  http.get<never, User[]>(`${API_URL}/users`, async ({ cookies }: { cookies: Record<string, string> }) => {
+    const token = cookies.token;  // Extract token from cookies
+console.log('token in get handler', token)
     if (!token) {
       return new HttpResponse(null, { status: 404 });
     }
@@ -75,129 +77,25 @@ console.log('id from params in handler:', id)
       id: generateNewUserId(),
       username: newUser.username,
       email: newUser.email,
-      password: newUser.password, // kept internally
-      privacyPolicy: newUser.privacyPolicy, // kept internally
+      password: newUser.password, 
+      privacyPolicy: newUser.privacyPolicy, 
       role: newUser.role,
     };
 
     // Create a response user object omitting password and privacyPolicy
     const responseUser = {
       id: createdUser.id,
+      user: {
       username: createdUser.username,
       email: createdUser.email,
       role: createdUser.role,
+      }
     };
 
     const token = `mocked-token-${createdUser.id}`;
 
     return HttpResponse.json({ user: responseUser, token }, { status: 201 });
   }),
-
-
-// Mocking PUT /users/:id
-// http.put<{ id: string }, { user: Partial<UserProfile> }>(
-//   `${API_URL}/users/:id`,
-//   async ({ params, cookies, request }: { params: { id: string }; cookies: Record<string, string>; request: Request }) => {
-//     const { id } = params;
-//     const token = cookies.token;
-
-//     console.log('id from params in handler:', id);
-
-//     if (!token) {
-//       return new HttpResponse(null, { status: 403 });
-//     }
-
-//     const users: User[] = [
-//       { id: 1, user: { username: 'user1', email: 'user1@example.com', password: 'User1@password1', privacyPolicy: true, role: 'admin' } },
-//       { id: 2, user: { username: 'user2', email: 'user2@example.com', password: 'User2@password2', privacyPolicy: true, role: 'user' } },
-//       { id: 3, user: { username: 'user3', email: 'user3@example.com', password: 'User3@password3', privacyPolicy: false, role: 'user' } },
-//     ];
-
-//     const userIndex = users.findIndex(user => user.id === Number(id));
-
-//     if (userIndex === -1) {
-//       return new HttpResponse(null, { status: 404 });
-//     }
-
-//     try {
-//       const updatedData = await request.json() as Partial<User["user"]>;
-
-//       console.log('Updated data from request:', updatedData);
-
-//       // Update the user object with provided fields
-//       users[userIndex].user = {
-//         ...users[userIndex].user,
-//         ...updatedData,
-//       };
-
-//       console.log('Updated user object:', users[userIndex]);
-
-//       return HttpResponse.json(users[userIndex]);
-//     } catch (error) {
-//       return new HttpResponse(null, { status: 400 });
-//     }
-//   }
-// ),
-
-
-// http.put<{ id: string }, { user: Partial<UpdatedUserRequestBody> }>(
-//   `${API_URL}/users/:id`,
-//   async ({ params, cookies, request }: { params: { id: string }; cookies: Record<string, string>; request: Request }) => {
-//     const { id } = params;
-//     const token = cookies.token;
-
-//     console.log('id from params in handler:', id);
-
-//     // If no token is provided in cookies, return Forbidden response
-//     if (!token) {
-//       return new HttpResponse(null, { status: 403 });
-//     }
-
-//     // Sample users array (mock data)
-//     const users: User[] = [
-//       { id: 1, user: { username: 'user1', email: 'user1@example.com', password: 'User1@password1', privacyPolicy: true, role: 'admin' } },
-//       { id: 2, user: { username: 'user2', email: 'user2@example.com', password: 'User2@password2', privacyPolicy: true, role: 'user' } },
-//       { id: 3, user: { username: 'user3', email: 'user3@example.com', password: 'User3@password3', privacyPolicy: false, role: 'user' } },
-//     ];
-
-//     // Find the user by id
-//     const userIndex = users.findIndex(user => user.id === Number(id));
-
-//     if (userIndex === -1) {
-//       return new HttpResponse(null, { status: 404 });
-//     }
-
-//     try {
-//       // Parse the updated data from the request
-//       const updatedData = await request.json() as Partial<User['user']>;
-//       console.log('Updated data from request:', updatedData);
-
-//       // Update the user object with the provided fields
-//       users[userIndex].user = {
-//         ...users[userIndex].user,
-//         ...updatedData,
-//       };
-
-//       console.log('Updated user object:', users[userIndex]);
-
-//       // Flatten the updated user object into the UserProfile type
-    
-//       const updatedUserProfile: UserProfile = {
-//         id: users[userIndex].id,
-//         username: users[userIndex].user.username ?? null,
-//         email: users[userIndex].user.email ?? null,
-//         role: users[userIndex].user.role ?? null,
-//       };
-
-//       // Return the updated user profile
-//       return HttpResponse.json({ userProfile: updatedUserProfile });
-
-//     } catch (error) {
-//       console.error('Error updating user:', error);
-//       return new HttpResponse(null, { status: 400 });
-//     }
-//   }
-// ),
 
 
 
@@ -240,19 +138,22 @@ http.put<{ id: string }, { user: Partial<UpdatedUserRequestBody> }>(
         ...updatedData,
       };
 
-      console.log('Updated user object:', users[userIndex]);
+      console.log('Updated user in handler:', users[userIndex]);
 
       // Flatten the updated user object into the UserProfile type
-      const updatedUserProfile: UserProfile = {
-        id: users[userIndex].id,
-        username: users[userIndex].user.username ?? null,
-        email: users[userIndex].user.email ?? null,
-        role: users[userIndex].user.role ?? null,
+      const updatedUserProfile: User = {
+        id: users[userIndex].id, 
+        user: {
+          username: users[userIndex].user.username ?? null,
+          email: users[userIndex].user.email ?? null,
+          role: users[userIndex].user.role ?? null,
+        }
+       
       };
 
       // Generate the new mocked token (based on updated user ID)
       const newToken = `mocked-token-${users[userIndex].id}-${users[userIndex].user.username}`;
-
+console.log('new user array in handler:', users)
       // Return the updated user profile, new token, and the updated users array
       return new HttpResponse(
         JSON.stringify({
@@ -273,7 +174,6 @@ http.put<{ id: string }, { user: Partial<UpdatedUserRequestBody> }>(
 
 
 // Mocking DELETE /users/:id
-
 http.delete<UserParams, DeleteUserResponseBody>(
   `${API_URL}/users/:id`,
   async ({ params, cookies }: { params: UserParams; cookies: Record<string, string> }) => {
@@ -301,22 +201,16 @@ http.delete<UserParams, DeleteUserResponseBody>(
     }
 
     // Remove the user from the users array
-    users = users.filter(user => user.id !== Number(id)); // Filter out the user with the given id
+    users.splice(userIndex, 1); // This removes the user at the found index
 
-    // Persist the updated users list back to the database or in-memory storage
-    // await saveUsersToDatabase(users); // Replace with your actual data saving logic
-
-    // Return the updated users list in the response (or success message)
-
-    const flattenedUsers: UserProfile[] = users.map(userObj => ({
-      id: userObj.id,
-      username: userObj.user.username,
-      email: userObj.user.email,
-      role: userObj.user.role,
-    }));
-console.log(' flattende user in handler:', flattenedUsers)
-    return HttpResponse.json({ message: `User with ID ${id} has been deleted.`, flattenedUsers }); // Return the updated array of users
+    
+    // Return the updated users array after deletion
+    return HttpResponse.json({
+      message: `User with ID ${id} has been deleted.`,
+      users, 
+    });
   }
 ),
+
 
 ];

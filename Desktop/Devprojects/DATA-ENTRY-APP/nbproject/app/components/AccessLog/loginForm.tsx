@@ -1,163 +1,112 @@
+
+
+
 // 'use client';
 
-// import { LoginRequest } from '@/app/utilities/definitions';
-// import { useState } from 'react';
+// import React, { useState } from 'react';
+
 
 // interface UserLoginProps {
-//   onSubmit: (userInput: LoginRequest) => Promise<{ token: string } | void>;
+//   onSubmit: (userInput: { username: string; password: string }) => Promise<void>;
 // }
-
-// const UserLogin: React.FC<UserLoginProps> = ({ onSubmit}) => {
+// const UserLogin: React.FC<UserLoginProps> = ({ onSubmit }) => {
 //   const [userInput, setUserInput] = useState({ username: '', password: '' });
-//   const [error, setError] = useState<string | null>(null);
-//   const [loading, setLoading] = useState(false);
 
 //   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 //     setUserInput({ ...userInput, [e.target.name]: e.target.value });
 //   };
 
-//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 //     e.preventDefault();
-//     if (!userInput.username || !userInput.password) {
-//       setError('Both email and password are required.');
-//       return;
-//     }
-
-//     setLoading(true);
-//     setError(null);
-
-//     try {
-//       console.log('User input passed to submit:', userInput);
-//       await onSubmit(userInput); // the logic of storing the token is handled outside
-
-//     } catch (err) {
-//       setError(`User login failed: ${err}`);
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
+//     onSubmit(userInput);
 //   };
 
 //   return (
-//     <div>
-//       <form
-//         className='mx-auto w-[50%] rounded justify-center align-middle border-2 border-red-950 bg-gray-100'
-//         onSubmit={handleSubmit}
+//     <form
+//       className="w-[90%] sm:w-[60%] lg:w-[40%] bg-white p-8 rounded-lg shadow-2xl"
+//       onSubmit={handleSubmit}
+//     >
+//       <input
+//         className="h-10 w-full mb-3 rounded border border-blue-600 p-2"
+//         type="text"
+//         name="username"
+//         placeholder="Username"
+//         value={userInput.username}
+//         onChange={handleInputChange}
+//         required
+//       />
+//       <input
+//         className="h-10 w-full mb-3 rounded border border-blue-600 p-2"
+//         type="password"
+//         name="password"
+//         placeholder="Password"
+//         value={userInput.password}
+//         onChange={handleInputChange}
+//         required
+//       />
+//       <button
+//         className="w-full bg-blue-600 text-white h-10 mb-5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
+//         type="submit"
 //       >
-//         <input
-//           className='h-10 w-[80%] mb-3 rounded mt-4'
-//           type='username'
-//           name='username'
-//           placeholder='username'
-//           value={userInput.username}
-//           onChange={handleInputChange}
-//           required
-//           autoComplete='username'
-//         />
-
-//         <input
-//           className='h-10 w-[80%] mb-3 rounded'
-//           type='password'
-//           name='password'
-//           placeholder='password'
-//           value={userInput.password}
-//           onChange={handleInputChange}
-//           required
-//           autoComplete='current-password'
-//         />
-
-//         <button
-//           className='bg-rose-100 text-red-800 h-8 w-32 border-3 mb-5 border-red-800 rounded focus:bg-red-800 focus:text-rose-100'
-//           type='submit'
-//         >
-//           {loading ? 'Logging in...' : 'Log In'}
-//         </button>
-
-//         {error && <p className='text-red-600 mt-4 text-center'>{error}</p>}
-//       </form>
-      
-      
-//     </div>
+//         Log In
+//       </button>
+//     </form>
 //   );
 // };
-
-// export default UserLogin;
+// export default UserLogin
 
 
 'use client';
 
-import { LoginRequest } from '@/app/utilities/definitions';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface UserLoginProps {
-  onSubmit: (userInput: LoginRequest) => Promise<{ token: string } | void>;
+  onSubmit: (userInput: { username: string; password: string }) => Promise<void>;
 }
 
 const UserLogin: React.FC<UserLoginProps> = ({ onSubmit }) => {
   const [userInput, setUserInput] = useState({ username: '', password: '' });
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserInput({ ...userInput, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!userInput.username || !userInput.password) {
-      setError('Both username and password are required.');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      await onSubmit(userInput);
-    } catch (err) {
-      setError(`Login failed: ${err}`);
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    onSubmit(userInput);
   };
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <h1 className='text-blue-600 mb-6'>Enter Login Details</h1>
       <form
-        className="mx-auto w-[50%] rounded justify-center align-middle border-2 border-red-950 bg-gray-100"
+        className="w-[90%] sm:w-[60%] lg:w-[40%] bg-white p-8 rounded-lg shadow-2xl"
         onSubmit={handleSubmit}
       >
         <input
-          className="h-10 w-[80%] mb-3 rounded mt-4"
+          className="h-10 w-full mb-3 rounded border border-blue-600 p-2"
           type="text"
           name="username"
-          placeholder="username"
+          placeholder="Username"
           value={userInput.username}
           onChange={handleInputChange}
           required
-          autoComplete="username"
         />
-
         <input
-          className="h-10 w-[80%] mb-3 rounded"
+          className="h-10 w-full mb-3 rounded border border-blue-600 p-2"
           type="password"
           name="password"
-          placeholder="password"
+          placeholder="Password"
           value={userInput.password}
           onChange={handleInputChange}
           required
-          autoComplete="current-password"
         />
-
         <button
-          className="bg-rose-100 text-red-800 h-8 w-32 border-3 mb-5 border-red-800 rounded focus:bg-red-800 focus:text-rose-100"
+          className="w-full bg-blue-600 text-white h-10 mb-5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
           type="submit"
         >
-          {loading ? 'Logging in...' : 'Log In'}
+          Log In
         </button>
-
-        {error && <p className="text-red-600 mt-4 text-center">{error}</p>}
       </form>
     </div>
   );

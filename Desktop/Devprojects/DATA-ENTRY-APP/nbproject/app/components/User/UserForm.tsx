@@ -1,95 +1,3 @@
-// import React, { useState } from 'react';
-// // import { useHistory } from 'react-router-dom';
-// // import './UserForm.css';
-
-// function UserForm() {
-//   const [formData, setFormData] = useState({
-//     username: '',
-//     email: '',
-//     password: '',
-//     privacyPolicy: false,
-//   });
-//   const history = useHistory();
-
-//   const handleChange = (e) => {
-//     const { name, value, type, checked } = e.target;
-//     setFormData({
-//       ...formData,
-//       [name]: type === 'checkbox' ? checked : value,
-//     });
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     // Submit form data to server
-//     console.log('Form data submitted:', formData);
-//     history.push('/');
-//   };
-
-//   const handleCancel = () => {
-//     history.push('/');
-//   };
-
-//   return (
-//     <form className="user-form" onSubmit={handleSubmit}>
-//       <div className="form-group">
-//         <label htmlFor="username">Username</label>
-//         <input
-//           type="text"
-//           id="username"
-//           name="username"
-//           value={formData.username}
-//           onChange={handleChange}
-//           required
-//         />
-//       </div>
-//       <div className="form-group">
-//         <label htmlFor="email">Email</label>
-//         <input
-//           type="email"
-//           id="email"
-//           name="email"
-//           value={formData.email}
-//           onChange={handleChange}
-//           required
-//         />
-//       </div>
-//       <div className="form-group">
-//         <label htmlFor="password">Password</label>
-//         <input
-//           type="password"
-//           id="password"
-//           name="password"
-//           value={formData.password}
-//           onChange={handleChange}
-//           required
-//         />
-//       </div>
-// <div className="form-group">
-//   <label>
-//     <input
-//       type="radio"
-//       name="privacyPolicy"
-//       checked={formData.privacyPolicy}
-//       onChange={handleChange}
-//       required
-//     />
-//     Accept Privacy Policy
-//   </label>
-// </div>
-//       <div className="form-buttons">
-//         <button type="submit">Submit</button>
-//         <button type="button" onClick={handleCancel}>Cancel</button>
-//       </div>
-//     </form>
-//   );
-// }
-
-// export default UserForm;
-
-
-
-
 'use client';
 
 import { NewUserRequestBody } from '@/app/utilities/definitions';
@@ -126,7 +34,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit }) => {
     email: '',
     password: '',
     privacyPolicy: false,
-    role: '', 
+    role: '',
 
   });
   const [error, setError] = useState<{ [key: string]: string }>({});
@@ -158,7 +66,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit }) => {
     try {
       await registrationSchema.validate(userInput, { abortEarly: false });
       await onSubmit(userInput);
-      setUserInput({ username: '', email: '', password: '',  role: '', privacyPolicy: false});
+      setUserInput({ username: '', email: '', password: '', role: '', privacyPolicy: false });
       setError({});
     } catch (err) {
       if (err instanceof Yup.ValidationError) {

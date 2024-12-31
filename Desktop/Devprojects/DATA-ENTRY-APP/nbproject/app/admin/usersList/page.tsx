@@ -1,28 +1,52 @@
 // 'use client';
-// import React, { useEffect } from 'react';
+
+// import React, { useEffect, useState } from 'react';
 // import UserList from '@/app/components/User/UserList';
 // import { useUserContext } from '@/app/context/userContext';
 
 // const ViewUsersPage = () => {
-//   const { fetchUsers, token, users, loading, error } = useUserContext();
-  
-//   useEffect(() => {
-//     if (token && (!users || users.length === 0)) {
-//       fetchUsers(); // Fetch users only if not already in state or the array is empty
-//     }
-//   }, [users]); 
- 
-//   if (loading) {
-//     return <div className="text-center text-xl text-gray-600">Loading users...</div>;
-//   }
+//   const { fetchUsers, users, currentUser, removeUser, setUsers, token } = useUserContext();
 
-//   if (error) {
-//     return <div className="text-center text-xl text-red-600">Error: {error}</div>;
+//   const [isLocalStorageLoaded, setIsLocalStorageLoaded] = useState(false); // Track if users are loaded from localStorage
+
+//   // Effect to load users from localStorage
+//   useEffect(() => {
+//     const storedUsers = localStorage.getItem('usersList');
+//     if (storedUsers) {
+//       setUsers(JSON.parse(storedUsers)); // Load users from localStorage
+//       setIsLocalStorageLoaded(true); // Mark as loaded from localStorage
+//     }
+//   }, []); // Runs only once when the component mounts
+
+//   // Effect to fetch users if not already loaded from localStorage or if `users` is empty
+//   useEffect(() => {
+//     const initializeUsers = async () => {
+//       if (!isLocalStorageLoaded && (!users || users.length === 0)) {
+//         await fetchUsers(); // Fetch users only if they are not loaded from localStorage
+//       }
+//     };
+//     initializeUsers();
+//   }, [isLocalStorageLoaded, users, token]); // Fetch users if necessary
+
+//   // Handle delete user logic
+//   const handleDelete = async (id: string | null | undefined) => {
+//     if (!id) return;
+//     try {
+//       await removeUser(id); // Call removeUser from context
+//     } catch (error) {
+//       console.error('Error deleting user:', error);
+//     }
+//   };
+
+
+
+//   if (!users) {
+//     return <div className="text-center text-xl text-gray-600">Loading users...</div>;
 //   }
 
 //   return (
 //     <div>
-//       <UserList users={users} />
+//       <UserList users={users} currentUser={currentUser} onDelete={handleDelete} />
 //     </div>
 //   );
 // };
@@ -32,51 +56,47 @@
 
 
 'use client';
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import UserList from '@/app/components/User/UserList';
 import { useUserContext } from '@/app/context/userContext';
 
 const ViewUsersPage = () => {
-  const { fetchUsers, users, currentUser, removeUser } = useUserContext();
+  const { fetchUsers, users, currentUser, removeUser, token } = useUserContext();
 
+  
   useEffect(() => {
-    if (!users || users.length === 0) {
-      fetchUsers(); // Fetch from API only if users is not already loaded
+    
+  fetchUsers(); // Fetch users only if they are not loaded from localStorage
+      
+    },
+
+ [token]); // Fetch users if necessary
+
+  // Handle delete user logic
+  const handleDelete = async (id: string | null | undefined) => {
+    if (!id) return;
+    try {
+      await removeUser(id); // Call removeUser from context
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
-  }, []); // Fetch on initial render only
+  };
 
 
-  const flattenedUsers = users?.map((user: any) => ({
-    id: user.id,
-    username: user.user.username,  // Assuming the structure has 'user' object with 'username'
-    email: user.user.email,
-    role: user.user.role,
-    privacyPolicy: user.user.privacyPolicy,
-  }));
-
-  console.log('Flattened Users list:', flattenedUsers);  // Log the flattened user data
 
   if (!users) {
     return <div className="text-center text-xl text-gray-600">Loading users...</div>;
   }
-console.log('users list in page:', users)
-
-const handleDelete = async (id: string | null | undefined) => {
-  if (!id) return;
-  try {
-    await removeUser(id); // Call deleteUser from context
-  } catch (error) {
-    console.error('Error deleting user:', error);
-  }
-}
-
 
   return (
     <div>
-      <UserList users={flattenedUsers} currentUser={currentUser} onDelete={handleDelete} />
+      <UserList users={users} currentUser={currentUser} onDelete={handleDelete} />
     </div>
   );
 };
 
 export default ViewUsersPage;
+
+
 

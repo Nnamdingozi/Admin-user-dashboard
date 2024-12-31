@@ -1,222 +1,17 @@
-// import { http, HttpResponse } from 'msw';
-
-// // import type definition
-// import {AccessLog } from '@/app/utilities/definitions'
 
 
-
-// // Define the response bodies for the different endpoints
-// type GetAccessLogsResponseBody = AccessLog[];
-// type GetAccessLogResponseBody = AccessLog | { message: string };
-// type CreateAccessLogRequestBody = AccessLog;
-// type UpdateAccessLogRequestBody = Partial<AccessLog>; // Allow partial updates (e.g., just action or timestamp)
-// type DeleteAccessLogResponseBody = { message: string };
-// type GetAccessLogParam = {id: string}
-
-
-// const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-// // Mock data for the logs
-// const mockAccessLogs: AccessLog[] = [
-//   { id: 1, userId: 101, accesstime: '2024-10-09T12:00:00Z', access_locate: 'user_ip'},
-//   { id: 2, userId: 102, accesstime: '2024-11-09T12:00:00Z', access_locate: 'user_ip'},
-//   { id: 3, userId: 103, accesstime: '2024-12-09T12:00:00Z', access_locate: 'user_ip'},
-// ];
-
-// export const accessLogHandlers = [
-//   // GET all access logs1
-//   http.get<{}, GetAccessLogsResponseBody>(`${API_URL}/accesslogs`, async () => {
-//     return HttpResponse.json<GetAccessLogsResponseBody>(mockAccessLogs);
-//   }),
-
-//   // GET access log by ID
-//   http.get<GetAccessLogParam , GetAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ params }: { params: { id: string }}) => {
-//     const logId = parseInt(params.id, 10);
-//     const log = mockAccessLogs.find((log) => log.id === logId);
-
-//     if (!log) {
-//       return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-//     }
-
-//     return HttpResponse.json<GetAccessLogResponseBody>(log);
-//   }),
-
-//   // POST create a new access log
-//   http.post<{}, CreateAccessLogRequestBody, GetAccessLogResponseBody>(`${API_URL}/accesslogs`, async ({ request }: { request: Request}) => {
-//     const newLog: AccessLog = await request.json();
-//     const newId = mockAccessLogs.length + 1;
-//     const newAccessLog = { ...newLog, id: newId, timestamp: new Date().toISOString() };
-    
-//     mockAccessLogs.push(newAccessLog); // Simulate adding to the mock DB
-//     return HttpResponse.json<GetAccessLogResponseBody>(newAccessLog, { status: 201 });
-//   }),
-
-//   http.put<GetAccessLogParam , UpdateAccessLogRequestBody, GetAccessLogResponseBody>(
-//     `${API_URL}/accesslogs/:id`,
-//     async ({ request, params, cookies }: { request: Request; params: {id:string}; cookies: Record<string, string> }) => {
-//       const logId = parseInt(params.id, 10);
-//       const updatedLogData: UpdateAccessLogRequestBody = await request.json();
-//       const logIndex = mockAccessLogs.findIndex((log) => log.id === logId);
-  
-//       if (logIndex === -1) {
-//         // Return a consistent response type with a 404 error message
-//         return HttpResponse.json<{ message: string }>(
-//           { message: 'Access log not found' },
-//           { status: 404 }
-//         );
-//       }
-  
-//       const updatedLog = { ...mockAccessLogs[logIndex], ...updatedLogData };
-//       mockAccessLogs[logIndex] = updatedLog;
-  
-//       // Return the updated log object for client use
-//       return HttpResponse.json<GetAccessLogResponseBody>(updatedLog, { status: 200 });
-//     }
-//   ),
-  
-
-//   // DELETE an access log by ID
-//   http.delete<{ id: string }, {}, DeleteAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ params }: { params: { id: string }}) => {
-//     const logId = parseInt(params.id, 10);
-//     const logIndex = mockAccessLogs.findIndex((log) => log.id === logId);
-
-//     if (logIndex === -1) {
-//       return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-//     }
-
-//     mockAccessLogs.splice(logIndex, 1); // Simulate deletion
-//     return HttpResponse.json<DeleteAccessLogResponseBody>({ message: 'Access log deleted successfully' });
-//   }),
-// ];
-
-
-
-// 
-
-
-
-// import { http, HttpResponse} from 'msw';
-// import { AccessLog } from '@/app/utilities/definitions';
-
-// // Define response bodies
-// type GetAccessLogsResponseBody = AccessLog[];
-// type GetAccessLogResponseBody = AccessLog | { message: string };
-// type CreateAccessLogRequestBody = AccessLog;
-// type UpdateAccessLogRequestBody = Partial<AccessLog>;
-// type DeleteAccessLogResponseBody = { message: string };
-// type GetAccessLogParam = { id: string };
-
-// const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// // Mock token for validation
-// const mockToken = 'mock-valid-token';
-
-// // Mock access logs
-// const mockAccessLogs: AccessLog[] = [
-//   { id: 1, userId: 101, accesstime: '2024-10-09T12:00:00Z', access_locate: 'user_ip' },
-//   { id: 2, userId: 102, accesstime: '2024-11-09T12:00:00Z', access_locate: 'user_ip' },
-//   { id: 3, userId: 103, accesstime: '2024-12-09T12:00:00Z', access_locate: 'user_ip' },
-// ];
-
-// // Utility to validate token
-// const validateToken = (cookies:{ cookies: Record<string, string> }, headers: Headers): boolean => {
-//   const tokenFromCookies = cookies.get('auth-token');
-//   const tokenFromHeaders = headers.get('Authorization')?.replace('Bearer ', '');
-//   return tokenFromCookies === mockToken || tokenFromHeaders === mockToken;
-// };
-
-// // Handlers
-// export const accessLogHandlers = [
-//   // GET all access logs
-//   http.get<{}, GetAccessLogsResponseBody>(`${API_URL}/accesslogs`, async ({ cookies, request }: { cookies: Record<string, string> ; request:{ request: Request }}) => {
-//     if (!validateToken(cookies, request.headers)) {
-//       return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-//     }
-
-//     return HttpResponse.json<GetAccessLogsResponseBody>(mockAccessLogs);
-//   }),
-
-//   // GET access log by ID
-//   http.get<GetAccessLogParam, GetAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ params, cookies, request }: { params: GetAccessLogParam; cookies:{ cookies: Record<string, string> }; request: { request: Request }}) => {
-//     if (!validateToken(cookies, request.headers)) {
-//       return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-//     }
-
-//     const logId = parseInt(params.id, 10);
-//     const log = mockAccessLogs.find((log) => log.id === logId);
-
-//     if (!log) {
-//       return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-//     }
-
-//     return HttpResponse.json<GetAccessLogResponseBody>(log);
-//   }),
-
-//   // POST create a new access log
-//   http.post<{}, CreateAccessLogRequestBody, GetAccessLogResponseBody>(`${API_URL}/accesslogs`, async ({ request, cookies }: { request: { request: Request }; cookies:{ cookies: Record<string, string> } }) => {
-//     if (!validateToken(cookies, request.headers)) {
-//       return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-//     }
-
-//     const newLog: AccessLog = await request.json();
-//     const newId = mockAccessLogs.length + 1;
-//     const newAccessLog = { ...newLog, id: newId, accesstime: new Date().toISOString() };
-
-//     mockAccessLogs.push(newAccessLog);
-//     return HttpResponse.json<GetAccessLogResponseBody>(newAccessLog, { status: 201 });
-//   }),
-
-//   // PUT update an access log
-//   http.put<GetAccessLogParam, UpdateAccessLogRequestBody, GetAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ request, params, cookies }: { request: { request: Request }; params: GetAccessLogParam; cookies: Record<string, string> }) => {
-//     if (!validateToken(cookies, request.headers)) {
-//       return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-//     }
-
-//     const logId = parseInt(params.id, 10);
-//     const updatedLogData: UpdateAccessLogRequestBody = await request.json();
-//     const logIndex = mockAccessLogs.findIndex((log) => log.id === logId);
-
-//     if (logIndex === -1) {
-//       return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-//     }
-
-//     const updatedLog = { ...mockAccessLogs[logIndex], ...updatedLogData };
-//     mockAccessLogs[logIndex] = updatedLog;
-
-//     return HttpResponse.json<GetAccessLogResponseBody>(updatedLog, { status: 200 });
-//   }),
-
-//   // DELETE an access log by ID
-//   http.delete<{ id: string }, {}, DeleteAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ params, cookies, request }: { params: GetAccessLogParam;  cookies:{ cookies: Record<string, string> }; request: { request: Request }}) => {
-//     if (!validateToken(cookies, request.headers)) {
-//       return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-//     }
-
-//     const logId = parseInt(params.id, 10);
-//     const logIndex = mockAccessLogs.findIndex((log) => log.id === logId);
-
-//     if (logIndex === -1) {
-//       return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-//     }
-
-//     mockAccessLogs.splice(logIndex, 1);
-//     return HttpResponse.json<DeleteAccessLogResponseBody>({ message: 'Access log deleted successfully' });
-//   }),
-// ];
-
-
-// 
-
-
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
 import { AccessLog } from '@/app/utilities/definitions';
 
 // Define response bodies
 type GetAccessLogsResponseBody = AccessLog[];
-type GetAccessLogResponseBody = AccessLog | { message: string };
-type CreateAccessLogRequestBody = AccessLog;
+type GetAccessLogResponseBody = AccessLog | null;
+type CreateAccessLogRequestBody = AccessLog | null;
 type UpdateAccessLogRequestBody = Partial<AccessLog>;
-type DeleteAccessLogResponseBody = { message: string };
+type DeleteAccessLogResponseBody = {
+  message: string;
+  updatedLogs: AccessLog[];
+};
 type GetAccessLogParam = { id: string };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -225,106 +20,124 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const mockToken = 'mock-valid-token';
 
 // Mock access logs
-const mockAccessLogs: AccessLog[] = [
-  { id: 1, userId: 101, accesstime: '2024-10-09T12:00:00Z', access_locate: 'user_ip' },
-  { id: 2, userId: 102, accesstime: '2024-11-09T12:00:00Z', access_locate: 'user_ip' },
-  { id: 3, userId: 103, accesstime: '2024-12-09T12:00:00Z', access_locate: 'user_ip' },
+let mockAccessLogs: AccessLog[] = [
+  { id: 101, userId: 1, accesstime: '2024-10-09T12:00:00Z', access_locate: 'user1_ip' },
+  { id: 102, userId: 2, accesstime: '2024-11-09T12:00:00Z', access_locate: 'user2_ip' },
+  { id: 103, userId: 3, accesstime: '2024-12-09T12:00:00Z', access_locate: 'user3_ip' },
 ];
 
-// Utility to validate token
-const validateToken = (headers: Headers): boolean => {
-  // Extract token from the 'Authorization' header
-  const authorizationHeader = headers.get('Authorization');
-  
-  if (!authorizationHeader) {
-    return false; // No authorization header
-  }
-  
-  // Check if the header starts with 'Bearer '
-  if (!authorizationHeader.startsWith('Bearer ')) {
-    return false; // Invalid authorization format
-  }
-  
-  // Extract token by removing 'Bearer ' prefix
-  const tokenFromHeaders = authorizationHeader.replace('Bearer ', '');
-  
-  return tokenFromHeaders === mockToken; // Compare with the mock token
+let lastAssignedId = 103; // Initial value before any user is created
+
+// Function to get and increment the last assigned ID
+function generateNewUserId(): number {
+  lastAssignedId += 1;
+  return lastAssignedId;
 };
 
-
 export const accessLogHandlers = [
+  
   // GET all access logs
-  http.get<{}, GetAccessLogsResponseBody>(`${API_URL}/accesslogs`, async ({ request }: { request: Request }) => {
-    if (!validateToken(request.headers)) {
-      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    return HttpResponse.json<GetAccessLogsResponseBody>(mockAccessLogs);
-  }),
+  http.get<{}, GetAccessLogsResponseBody>(`${API_URL}/accesslogs`,
+    async ({ cookies }: { cookies: Record<string, string> }) => {
+      const token = cookies.token;  // Extract token from cookies
+      if (!token) {
+        return new HttpResponse(null, { status: 404 });
+      }
+      return HttpResponse.json<GetAccessLogsResponseBody>(mockAccessLogs);
+    }),
 
   // GET access log by ID
-  http.get<GetAccessLogParam, GetAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ params, request }: { params: GetAccessLogParam; request: Request }) => {
-    if (!validateToken(request.headers)) {
-      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    const logId = parseInt(params.id, 10);
-    const log = mockAccessLogs.find((log) => log.id === logId);
-
-    if (!log) {
-      return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-    }
-
-    return HttpResponse.json<GetAccessLogResponseBody>(log);
-  }),
+  http.get<GetAccessLogParam, GetAccessLogResponseBody>(`${API_URL}/accesslogs/:id`,
+    async ({ params, cookies }: { params: { id: string }; cookies: Record<string, string> }) => {
+      const { id } = params;
+      console.log('id from params in accesslog handler:', id);
+      const token = cookies.token;
+      if (!token) {
+        return new HttpResponse(null, { status: 403 });
+      }
+      const log = mockAccessLogs.find((log) => log.id === Number(id));
+      console.log('log data in handler:', log);
+      if (!log) {
+        return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
+      }
+      return HttpResponse.json<GetAccessLogResponseBody>(log);
+    }),
 
   // POST create a new access log
-  http.post<{}, CreateAccessLogRequestBody, GetAccessLogResponseBody>(`${API_URL}/accesslogs`, async ({ request }: { request: Request }) => {
-    if (!validateToken(request.headers)) {
-      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  http.post<{}, CreateAccessLogRequestBody>(
+    `${API_URL}/accesslogs`,
+    async ({ cookies, request }: { cookies: Record<string, string>; request: Request }) => {
+      const token = cookies.token;
+      if (!token) {
+        return new HttpResponse(null, { status: 403 });
+      }
+
+      const newLog = await request.json() as CreateAccessLogRequestBody;
+      if (newLog) {
+        const logResponse = {
+          id: generateNewUserId(),  // Generate new ID
+          userId: newLog.userId,
+          accesstime: newLog.accesstime,
+          access_locate: newLog.access_locate
+        };
+
+        mockAccessLogs.push(logResponse);  // Add new log to mockAccessLogs
+        return HttpResponse.json<GetAccessLogResponseBody>(logResponse, { status: 201 });
+      }
+
+      // Return an error if there's no valid log data
+      return new HttpResponse(null, { status: 400 });
     }
+  ),
 
-    const newLog: AccessLog = await request.json();
-    const newId = mockAccessLogs.length + 1;
-    const newAccessLog = { ...newLog, id: newId, accesstime: new Date().toISOString() };
-
-    mockAccessLogs.push(newAccessLog);
-    return HttpResponse.json<GetAccessLogResponseBody>(newAccessLog, { status: 201 });
-  }),
 
   // PUT update an access log
-  http.put<GetAccessLogParam, UpdateAccessLogRequestBody, GetAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ request, params }: { request: Request; params: GetAccessLogParam }) => {
-    if (!validateToken(request.headers)) {
-      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+  http.put<GetAccessLogParam, UpdateAccessLogRequestBody>(`${API_URL}/accesslogs/:id`,
+    async ({ params, cookies, request }: { params: { id: string }; cookies: Record<string, string>; request: Request }) => {
+      const { id } = params;
+      console.log('id from params in log handler:', id);
+      const token = cookies.token;
 
-    const logId = parseInt(params.id, 10);
-    const updatedLogData: UpdateAccessLogRequestBody = await request.json();
-    const logIndex = mockAccessLogs.findIndex((log) => log.id === logId);
+      if (!token) {
+        return new HttpResponse(null, { status: 403 });
+      }
 
-    if (logIndex === -1) {
-      return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-    }
+      const logIndex = mockAccessLogs.findIndex(log => log.id === Number(id));
+      if (logIndex === -1) {
+        return new HttpResponse(null, { status: 404 });
+      }
 
-    const updatedLog = { ...mockAccessLogs[logIndex], ...updatedLogData };
-    mockAccessLogs[logIndex] = updatedLog;
+      try {
+        const updatedLogData: UpdateAccessLogRequestBody = await request.json() as Partial<UpdateAccessLogRequestBody>;
+        const updatedLog = { ...mockAccessLogs[logIndex], ...updatedLogData };
+        mockAccessLogs[logIndex] = updatedLog;
 
-    return HttpResponse.json<GetAccessLogResponseBody>(updatedLog, { status: 200 });
-  }),
+        console.log('Updated log in handler:', updatedLog);
+        return HttpResponse.json<GetAccessLogResponseBody>(updatedLog, { status: 200 });
+      } catch (error) {
+        console.error('Error updating log:', error);
+        return new HttpResponse(null, { status: 400 });
+      }
+    }),
 
   // DELETE an access log by ID
-  http.delete<GetAccessLogParam, {}, DeleteAccessLogResponseBody>(`${API_URL}/accesslogs/:id`, async ({ params, request }: { params: GetAccessLogParam; request: Request }) => {
-    if (!validateToken(request.headers)) {
-      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+  http.delete<GetAccessLogParam, DeleteAccessLogResponseBody>(`${API_URL}/accesslogs/:id`,
+    async ({ params, cookies }: { params: GetAccessLogParam; cookies: Record<string, string> }) => {
+      const { id } = params;
+      const token = cookies.token;
+      if (!token) {
+        return new HttpResponse(null, { status: 403 });
+      }
 
-    const logId = parseInt(params.id, 10);
-    const logIndex = mockAccessLogs.findIndex((log) => log.id === logId);
+      const logIndex = mockAccessLogs.findIndex((log) => log.id === Number(id));
+      if (logIndex === -1) {
+        return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
+      }
 
-    if (logIndex === -1) {
-      return HttpResponse.json({ message: 'Access log not found' }, { status: 404 });
-    }
-
-    mockAccessLogs.splice(logIndex, 1);
-    return HttpResponse.json<DeleteAccessLogResponseBody>({ message: 'Access log deleted successfully' });
-  }),
-];  // Closing bracket for the array
+      mockAccessLogs.splice(logIndex, 1);  // Remove the log from the array
+      return HttpResponse.json<DeleteAccessLogResponseBody>({
+        message: 'Access log deleted successfully',
+        updatedLogs: mockAccessLogs  // Return the updated logs
+      })
+    }),
+];

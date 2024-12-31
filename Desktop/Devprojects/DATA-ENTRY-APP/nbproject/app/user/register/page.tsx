@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState } from 'react';
@@ -14,8 +13,6 @@ const UserRegistration = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
 
-  // Handle user registration
-  // Handle user registration
   const handleRegister = async (newUser: NewUserRequestBody): Promise<void> => {
     console.log('User object received in register page:', newUser);
     setErrorMessage('');
@@ -58,10 +55,10 @@ const UserRegistration = () => {
         </div>
       </div>
 
-      <div className="w-full md:w-[40%] h-28 bg-gradient-to-r from-rose-100 to-red-800 flex flex-col items-center justify-center p-6 rounded-lg">
-        <p className="text-lg font-semibold text-white mb-4">Already have an account?</p>
+      <div className="w-full md:w-[40%] h-16 bg-gradient-to-r from-bkue-100 to-blue-500 flex align-middle justify-between p-6 rounded-lg border-2">
+        <p className="text-lg font-semibold text-blue-600 mb-4">Already have an account?</p>
         <Link href="/user/login">
-          <button className="mt-3 bg-rose-100 text-red-800 px-6 py-2 rounded-lg shadow-md transition-colors duration-200 hover:bg-red-800 hover:text-rose-100">
+          <button className=" bg-blue-100 text-blue-600 h-10 w-20 rounded-lg shadow-md transition-colors duration-200 hover:bg-red-800 hover:text-rose-100">
             Log In
           </button>
         </Link>

@@ -1,8 +1,14 @@
-'use client'
+'use client';
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { AccessLog, UpdateAccessLog, LoginRequest } from '@/app/utilities/definitions';
-import { getAccessLogs, getAccessLogById, createAccessLog, updateAccessLog, deleteAccessLog } from '@/app/api/accessLogApi'; // assuming your API functions are in this file
+import { AccessLog, UpdateAccessLog } from '@/app/utilities/definitions';
+import {
+  getAccessLogs,
+  getAccessLogById,
+  createAccessLog,
+  updateAccessLog,
+  deleteAccessLog,
+} from '@/app/api/accessLogApi';
 import { useUserContext } from './userContext';
 
 interface AccessLogContextType {
@@ -10,19 +16,23 @@ interface AccessLogContextType {
   accessLog: AccessLog | null;
   loading: boolean;
   error: string | null;
-  getLogs: (token: string) => void;
-  getLogById: (id: number) => void;
-  createLog: (log: AccessLog) => void;
-  updateLog: (id: number, log: UpdateAccessLog) => void;
-  deleteLog: ( id: number) => void;
+  getLogs: () => Promise<void>;
+  getLogById: (id: string) => Promise<AccessLog | null>;
+  createLog: (log: AccessLog) => Promise<AccessLog | null>;
+  updateLog: (id: string, log: UpdateAccessLog) => Promise<void>;
+  deleteLog: (id: string) => Promise<void>;
+  setAccessLogs: React.Dispatch<React.SetStateAction<AccessLog[]>>;
+  setAccessLog: React.Dispatch<React.SetStateAction<AccessLog | null>>;
+
 }
+
 
 const AccessLogContext = createContext<AccessLogContextType | undefined>(undefined);
 
-export const useAccessLog = (): AccessLogContextType => {
+export const useAccessLogContext = (): AccessLogContextType => {
   const context = useContext(AccessLogContext);
   if (!context) {
-    throw new Error('useAccessLog must be used within an AccessLogProvider');
+    throw new Error('useAccessLogContext must be used within an AccessLogProvider');
   }
   return context;
 };
@@ -32,110 +42,127 @@ interface AccessLogProviderProps {
 }
 
 export const AccessLogProvider: React.FC<AccessLogProviderProps> = ({ children }) => {
-    const [accessLogs, setAccessLogs] = useState<AccessLog[]>(() => {
-    const savedLogs = localStorage.getItem('accessLogs');
-    return savedLogs ? JSON.parse(savedLogs) : [];
-  });
- 
- 
-  const [accessLog, setAccessLog] = useState<AccessLog | null>(() => {
-    const savedLog = localStorage.getItem('accessLog');
-    return savedLog ? JSON.parse(savedLog) : null;
-  });
-
-  const [loading, setLoading] = useState<boolean>(false);
+  const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
+  const [accessLog, setAccessLog] = useState<AccessLog | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const {token} = useUserContext();
+  const { token } = useUserContext();
 
-  const getLogs = async () => {
-    if(accessLogs.length > 0) return;
-   
+  useEffect(() => {
+    // Load access logs and a specific access log from localStorage on initial mount
+    const savedLogs = localStorage.getItem('accessLogs');
+    if (savedLogs) setAccessLogs(JSON.parse(savedLogs));
+  
+    const savedLog = localStorage.getItem('accessLog');
+    if (savedLog) setAccessLog(JSON.parse(savedLog));
+  }, []);
+  
+  useEffect(() => {
+    if (token) {
+      getLogs(); // Call getLogs only if the token is available
+    }
+  }, [token]);
+  
+  const getLogs = async (): Promise<void> => {
+    if (!token) {
+      console.warn('Token is not available. Skipping getLogs call.');
+      return; // Exit early if the token is not available
+    }
+  
+    setLoading(true);
+    setError(null);
+  
     try {
-      setLoading(true);
-      setError(null)
-
-      const fetchedlogs = await getAccessLogs(token!);
-      setAccessLogs(fetchedlogs || []);
-      localStorage.setItem('accessLogs', JSON.stringify(fetchedlogs))
+      const fetchedLogs = await getAccessLogs(token);
+      setAccessLogs(fetchedLogs || []);
+      localStorage.setItem('accessLogs', JSON.stringify(fetchedLogs));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to fetch AccessLogs');
+      const message = err instanceof Error ? err.message : 'Unable to fetch AccessLogs';
+      setError(message);
+      console.error('Error fetching logs:', message, err);
     } finally {
       setLoading(false);
     }
   };
- 
 
-  const getLogById = async (id: number) => {
-    if (!id) throw new Error('Invalid user ID');
 
-    setLoading(true);
-    setError(null);
-
+  const getLogById = async (id: string): Promise<AccessLog | null> => {
     try {
+      setLoading(true);
+      setError(null);
+
       const savedLog = localStorage.getItem(`accessLog_${id}`);
       if (savedLog) return JSON.parse(savedLog);
 
-      const fetchedlog = await getAccessLogById(token!, id);
-      if(!fetchedlog) throw new Error('Access Log for user not found');
-      localStorage.setItem(`accessLog_${id}`, JSON.stringify(fetchedlog));
-      return fetchedlog;
-    }
+      const fetchedLog = await getAccessLogById(id, token!);
+      if (!fetchedLog) throw new Error('Access Log for user not found');
 
-      catch (err: any) {
-        setError(err.message || 'Failed to fetch log for  user.');
-        return null
-     
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createLog = async (log: AccessLog): Promise<AccessLog | null>  => {
-    setLoading(true);
-    setError(null)
-    try {
-      const newLog = await createAccessLog(log);
-    setAccessLog(newLog)
-    return newLog
+      setAccessLog(fetchedLog);
+      localStorage.setItem(`accessLog_${id}`, JSON.stringify(fetchedLog));
+      return fetchedLog;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const message = err instanceof Error ? err.message : 'Failed to fetch log for user.';
+      setError(message);
+      console.error(message);
+      return null;
     } finally {
       setLoading(false);
     }
-    return null
   };
 
-
-
-  const updateLog = async (id: number, log: UpdateAccessLog) => {
-    setLoading(true);
-    setError(null)
+  const createLog = async (log: AccessLog): Promise<AccessLog | null> => {
     try {
-      const updatedLog = await updateAccessLog(token!, id, log);
-      setAccessLog(updatedLog); // Update specific log
+      setLoading(true);
+      setError(null);
 
+      const newLog = await createAccessLog(token!, log);
+      setAccessLog(newLog);
+      return newLog;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      setError(message);
+      console.error(message);
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
- 
-  const deleteLog = async (id: number) => {
-    setLoading(true);
-    setError(null)
+  const updateLog = async (id: string, log: UpdateAccessLog): Promise<void> => {
     try {
-      await deleteAccessLog(token!, id);
-      setAccessLogs((prevLogs) => prevLogs.filter((log) => log.id !== id)); // Remove log by id
+      setLoading(true);
+      setError(null);
+
+      const updatedLog = await updateAccessLog(id, token!, log);
+      setAccessLog(updatedLog);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      setError(message);
+      console.error(message);
     } finally {
       setLoading(false);
     }
   };
 
+  const deleteLog = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await deleteAccessLog(id, token!);
+      setAccessLogs((prevLogs) => prevLogs.filter((log) => log.id !== Number(id)));
+      localStorage.setItem('accessLogs', JSON.stringify(response));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      setError(message);
+      console.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
 
 
   return (
@@ -150,6 +177,8 @@ export const AccessLogProvider: React.FC<AccessLogProviderProps> = ({ children }
         createLog,
         updateLog,
         deleteLog,
+        setAccessLogs,
+        setAccessLog,
       }}
     >
       {children}
